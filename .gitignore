@@ -32,3 +32,6 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# .auto.tfvars file containing credentials
+secrets.auto.tfvars
