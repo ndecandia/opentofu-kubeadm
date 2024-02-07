@@ -3,6 +3,9 @@ terraform {
     vsphere = {
       version = "~> 2.0"
     }
+    external = {
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -46,9 +49,7 @@ locals {
 }
 
 resource "vsphere_virtual_machine" "control_plane" {
-  count = var.control_plane_node_count
-
-  name             = format("%s%02d", var.control_plane_hostname, count.index + 1)
+  name             = format("%s%02d", var.control_plane_hostname, 1)
   resource_pool_id = data.vsphere_compute_cluster.this.resource_pool_id
   datastore_id     = data.vsphere_datastore.this.id
   num_cpus         = var.control_plane_num_cpus
@@ -70,18 +71,55 @@ resource "vsphere_virtual_machine" "control_plane" {
     template_uuid = data.vsphere_virtual_machine.node_template.uuid
     customize {
       linux_options {
-        host_name = format("%s%02d", var.control_plane_hostname, count.index + 1)
+        host_name = format("%s%02d", var.control_plane_hostname, 1)
         domain    = var.domain
       }
 
       network_interface {
-        ipv4_address = cidrhost(var.vsphere_network_cidr, 11 + count.index)
+        ipv4_address = cidrhost(var.vsphere_network_cidr, 11)
         ipv4_netmask = 24
       }
       ipv4_gateway    = local.ipv4_gateway
       dns_server_list = var.dns_servers
     }
   }
+
+  connection {
+    type        = "ssh"
+    user        = var.user
+    private_key = var.private_key
+    host        = self.default_ip_address
+  }
+
+  provisioner "file" {
+    destination = "/tmp/kubeadm-init.yaml"
+    content = templatefile("${path.module}/templates/kubeadm_init.yaml.tftpl", {
+      pod_subnet             = var.pod_subnet
+      cluster_name           = var.cluster_name
+      bootstrap_token_id     = var.bootstrap_token.id
+      bootstrap_token_secret = var.bootstrap_token.secret
+      certificate_key        = var.certificate_key
+      cri_socket             = var.cri_socket
+    })
+  }
+
+  provisioner "remote-exec" {
+    scripts = [
+      "${path.module}/scripts/install_tools.sh",
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = ["sudo kubeadm init --upload-certs --config /tmp/kubeadm-init.yaml"]
+  }
+}
+
+data "external" "cert_hash" {
+  program = [
+    "sh",
+    "-c",
+    "ssh ${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address} < '${path.module}/scripts/get_cert_fingerprint.sh' | tail -n1"
+  ]
 }
 
 resource "vsphere_virtual_machine" "worker" {
@@ -120,5 +158,22 @@ resource "vsphere_virtual_machine" "worker" {
       ipv4_gateway    = local.ipv4_gateway
       dns_server_list = var.dns_servers
     }
+  }
+
+  connection {
+    type        = "ssh"
+    user        = var.user
+    private_key = var.private_key
+    host        = self.default_ip_address
+  }
+
+  provisioner "remote-exec" {
+    scripts = [
+      "${path.module}/scripts/install_tools.sh",
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = ["sudo kubeadm join ${vsphere_virtual_machine.control_plane.default_ip_address}:6443 --token ${var.bootstrap_token.id}.${var.bootstrap_token.secret} --discovery-token-ca-cert-hash sha256:${data.external.cert_hash.result.fingerprint}"]
   }
 }

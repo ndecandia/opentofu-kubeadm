@@ -1,0 +1,15 @@
+# vim: set filetype=yaml ts=2 sw=0 expandtab:
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+networking:
+  podSubnet: ${yamlencode(pod_subnet)}
+clusterName: ${yamlencode(cluster_name)}
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+bootstrapTokens:
+- token: ${yamlencode("${bootstrap_token_id}.${bootstrap_token_secret}")}
+  ttl: 2h
+certificateKey: ${yamlencode(certificate_key)}
+nodeRegistration:
+  criSocket: ${yamlencode(cri_socket)}

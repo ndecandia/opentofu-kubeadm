@@ -1,6 +1,24 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
+provider "registry.opentofu.org/hashicorp/external" {
+  version     = "2.3.2"
+  constraints = "~> 2.0"
+  hashes = [
+    "h1:q/MoMIfCx8pnZ8TjsdVTnlAsoRhTIaK89oUWBPyzTM8=",
+    "zh:0143c509923e07307a7274d763318177a63405a310f4a5a6bf94fe7073854fd1",
+    "zh:04508a0bf228061325699a28dccbda51281d4413d510ee18b0a24446aaa04b15",
+    "zh:05ac7fffde0f3cc0ccbb505e5bf93609faeca26d6a9cbbfcf6b6baacbd8500d9",
+    "zh:15329fbf9b184ec8db05a49c882b26f1f965ef9fa6249064b8b9f6e16cfb79a6",
+    "zh:27b9b1821d81767f7012621078186005c0974b364dffceae177da6b8ebf49124",
+    "zh:5be8885ee9a653d83cc5cf42bb442d46fe51e94cddb6ec21b9a59104140af5fd",
+    "zh:83f3904081624a475e0a11bbca7f57a17340c0e01ce4a3980da9aff39efe56a1",
+    "zh:8ee02c9169323a4883610b3071dcb7799702fe03f29c6be173639d4f66c37e87",
+    "zh:961d76cbe936ab42ce7ab587f6f45b62e032e541dd15a2b5e71914c2a12e33dd",
+    "zh:cfd7025fa95046b3fd3e56704ad74a38820feab67587eaa7e4965be8bd50eb99",
+  ]
+}
+
 provider "registry.opentofu.org/hashicorp/vsphere" {
   version     = "2.6.1"
   constraints = "~> 2.0"

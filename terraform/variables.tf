@@ -169,3 +169,52 @@ variable "domain" {
   description = "Search domain to assign to nodes"
   default     = "kcdbrazil.internal"
 }
+
+variable "user" {
+  type        = string
+  description = "Guest OS user to log in as"
+  default     = "nicola"
+}
+
+variable "private_key" {
+  type        = string
+  description = "SSH private key content to connect to the machine"
+  sensitive   = true
+}
+
+variable "pod_subnet" {
+  type        = string
+  description = "The subnet used by pods"
+  default     = "10.44.0.0/16"
+}
+
+variable "cluster_name" {
+  type        = string
+  description = "The name of the Kubernetes cluster"
+  default     = "kcdcluster"
+}
+
+variable "bootstrap_token" {
+  description = "Bootstrap token used by kubeadm"
+  type = object({
+    id     = string
+    secret = string
+  })
+  default = {
+    id     = "r34e40"
+    secret = "47e2yrog8r4cuisa"
+  }
+  sensitive = true
+}
+
+variable "certificate_key" {
+  type        = string
+  description = "Encryption to encrypt control plane certificates with"
+  default     = "3f859ca3f1e48ff8e8b3bd565c861425751d51551af0de337894ffb5b40414f3"
+}
+
+variable "cri_socket" {
+  type        = string
+  description = "Container runtime socket path"
+  default     = "unix:///run/containerd/containerd.sock"
+}
