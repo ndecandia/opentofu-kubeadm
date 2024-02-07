@@ -122,6 +122,14 @@ data "external" "cert_hash" {
   ]
 }
 
+data "external" "kubeconfig" {
+  program = [
+    "sh",
+    "-c",
+    "ssh ${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address} < '${path.module}/scripts/get_kubeconfig.sh' | tail -n1"
+  ]
+}
+
 resource "vsphere_virtual_machine" "worker" {
   count = var.worker_node_count
 
