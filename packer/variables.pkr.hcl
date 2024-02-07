@@ -109,7 +109,7 @@ variable "ssh_authorized_keys" {
 variable "user" {
   type        = string
   description = "Initial user for the machine"
-  default     = "hermedia"
+  default     = "nicola"
 }
 
 variable "user_full_name" {
