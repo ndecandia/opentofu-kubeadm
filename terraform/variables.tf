@@ -78,7 +78,7 @@ variable "control_plane_node_count" {
 variable "control_plane_num_cpus" {
   type        = number
   description = "Number of vCPU for control plane nodes"
-  default     = 2
+  default     = 4
 
   validation {
     condition     = var.control_plane_num_cpus >= 2
@@ -89,7 +89,7 @@ variable "control_plane_num_cpus" {
 variable "control_plane_memory" {
   type        = number
   description = "Amount of memory for control plane nodes, in GiB"
-  default     = 2
+  default     = 4
 
   validation {
     condition     = var.control_plane_memory >= 2
@@ -117,7 +117,7 @@ variable "worker_hostname" {
 variable "worker_node_count" {
   type        = number
   description = "Number of worker nodes"
-  default     = 1
+  default     = 2
 
   validation {
     condition     = var.worker_node_count >= 1
@@ -128,7 +128,7 @@ variable "worker_node_count" {
 variable "worker_num_cpus" {
   type        = number
   description = "Number of vCPU for worker nodes"
-  default     = 2
+  default     = 4
 
   validation {
     condition     = var.worker_num_cpus >= 2
@@ -139,7 +139,7 @@ variable "worker_num_cpus" {
 variable "worker_memory" {
   type        = number
   description = "Amount of memory for worker nodes, in GiB"
-  default     = 2
+  default     = 4
 
   validation {
     condition     = var.worker_memory >= 2

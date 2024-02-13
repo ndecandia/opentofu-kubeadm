@@ -1,20 +1,3 @@
-terraform {
-  required_providers {
-    vsphere = {
-      version = "~> 2.0"
-    }
-    external = {
-      version = "~> 2.0"
-    }
-  }
-}
-
-provider "vsphere" {
-  vsphere_server       = var.vsphere_server
-  user                 = var.vsphere_user
-  password             = var.vsphere_password
-  allow_unverified_ssl = var.vsphere_allow_unverified_ssl
-}
 
 data "vsphere_datacenter" "this" {
   name = var.vsphere_datacenter
@@ -119,6 +102,38 @@ data "external" "cert_hash" {
     "sh",
     "-c",
     "ssh ${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address} < '${path.module}/scripts/get_cert_fingerprint.sh' | tail -n1"
+  ]
+}
+
+data "external" "k8s_server" {
+  program = ["ssh", "-o", "StrictHostKeyChecking=no", "${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address}", <<EOF
+  server=$(sudo kubectl config view  --kubeconfig /etc/kubernetes/admin.conf --output 'jsonpath={..server}'; echo)
+  jq -n --arg server "$server" '{"server":$server}'
+  EOF
+  ]
+}
+
+data "external" "k8s_ca" {
+  program = ["ssh", "-o", "StrictHostKeyChecking=no", "${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address}", <<EOF
+  cert_ca=$(sudo kubectl config view --raw --kubeconfig /etc/kubernetes/admin.conf --output 'jsonpath={..certificate-authority-data}'| base64 -d)
+  jq -n --arg cert_ca "$cert_ca" '{"cert_ca":$cert_ca}'
+  EOF
+  ]
+}
+
+data "external" "k8s_client_crt" {
+  program = ["ssh", "-o", "StrictHostKeyChecking=no", "${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address}", <<EOF
+  client_crt=$(sudo kubectl config view --raw --kubeconfig /etc/kubernetes/admin.conf --output 'jsonpath={..client-certificate-data}'| base64 -d)
+  jq -n --arg client_crt "$client_crt" '{"client_crt":$client_crt}'
+  EOF
+  ]
+}
+
+data "external" "k8s_client_key" {
+  program = ["ssh", "-o", "StrictHostKeyChecking=no", "${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address}", <<EOF
+  client_key=$(sudo kubectl config view --raw --kubeconfig /etc/kubernetes/admin.conf --output 'jsonpath={..client-key-data}'| base64 -d)
+  jq -n --arg client_key "$client_key" '{"client_key":$client_key}'
+  EOF
   ]
 }
 
