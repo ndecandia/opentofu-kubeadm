@@ -93,7 +93,8 @@ resource "vsphere_virtual_machine" "control_plane" {
   }
 
   provisioner "remote-exec" {
-    inline = ["sudo kubeadm init --upload-certs --config /tmp/kubeadm-init.yaml"]
+    inline = ["sudo kubeadm init --skip-phases=addon/kube-proxy --upload-certs --config /tmp/kubeadm-init.yaml"]
+    # inline = ["sudo kubeadm init --upload-certs --config /tmp/kubeadm-init.yaml"]
   }
 }
 
@@ -101,7 +102,7 @@ data "external" "cert_hash" {
   program = [
     "sh",
     "-c",
-    "ssh ${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address} < '${path.module}/scripts/get_cert_fingerprint.sh' | tail -n1"
+    "ssh -o StrictHostKeyChecking=no ${var.user}@${vsphere_virtual_machine.control_plane.default_ip_address} < '${path.module}/scripts/get_cert_fingerprint.sh' | tail -n1"
   ]
 }
 
