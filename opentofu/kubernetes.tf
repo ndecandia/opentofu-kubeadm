@@ -62,3 +62,19 @@ resource "kubernetes_manifest" "ciliumloadbalancerippool" {
     }
   }
 }
+
+resource "kubernetes_manifest" "ciliuml2announcementpolicy" {
+  manifest = {
+    "apiVersion" = "cilium.io/v2alpha1"
+    "kind"       = "CiliumL2AnnouncementPolicy"
+
+  "metadata" = {
+    "name" = "policy1"
+  }
+
+  "spec" = {
+    "externalIPs"       = "true"
+    "loadBalancerIPs"   = "true"
+  }
+}
+}
